@@ -1,0 +1,15 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    background: radial-gradient(circle at center,
+    #1b4b8a 0%,
+    #0f2a4f 40%,
+    #0a1f3d 70%,
+    #07182f 100%);
+}
+.meetscribe h1{
+    color:wheat
+}
