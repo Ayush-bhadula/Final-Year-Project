@@ -11,10 +11,61 @@
 <body>
     <div class="meetscribe">
         <div class="app-name">
- <h1>MeetScribe</h1>
+            <!-- <img src="" alt="App Icon"> -->
+            <h1>MeetScribe</h1>
+
         </div>
-       
+        <div class="sign-in">
+            <p>Sign in to your account</p>
+        </div>
+        <div class="login-box">
+            <div class="login">
+                <img src="user.png" width="25px">
+                <h3>Login</h3>
+            </div>
+            
+            <div class="email">
+                <label for="email">Email</label>
+                <input type="email" id="email" class="inputs" placeholder=" Enter Email">
+
+            </div>
+            <div class="password">
+                <label for="password">Password</label>
+                <input type="password" id="pass" class="inputs" placeholder="Password">
+
+            </div>
+            <div class="Country">
+                <label for="Country">Select Country</label>
+                <select name="countyr" id="countries"><option value="country" id="country" class="inputs"> </option></select>
+                
+
+            </div>
+            <div class="remember-forgot">
+                <div class="remember-me">
+                    <input type="checkbox">
+                    <p>Remember Me</p>
+                </div>
+                <div class="forgot-pass">
+                    <a href="#">Forgot Password ?</a>
+                </div>
+            </div>
+            
+            
+            <div class="login-btn">
+                <button id="login">Log In</button>
+            </div>
+            <div class="divider">
+    <span>OR</span>
+</div>
+            <div class="signup">
+                <p>Don't have an account ? <a href="#">Sign Up</a></p>
+            </div>
+
+        </div>
+
     </div>
+
+    <script src="User_Authentication.js"></script>
 </body>
 
 </html>
