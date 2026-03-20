@@ -26,7 +26,7 @@ body{
 
 }
  ::placeholder{
-    color: white;
+    color: rgb(58, 57, 57);
     opacity: 1;
 }
 .app-name h1{
@@ -85,8 +85,8 @@ label{
     border-radius: 8px;
     border: none;
     outline: none;
-    background: #4d6ea5;
-    color: white;
+    background: #ffffff;
+    color: black;
     transition: 0.3s;
     font-size: 14px;
     font-weight: 600;

@@ -1,0 +1,137 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+body{
+    background: radial-gradient(circle at center,
+    #1b4b8a 0%,
+    #0f2a4f 40%,
+    #0a1f3d 70%,
+    #07182f 100%);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.inputs {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    background: #ffffff;
+    color: black;
+    transition: 0.3s;
+    font-size: 14px;
+    font-weight: 600;
+    
+}
+.inputs{
+   
+  color: #000;              
+  background-color: #fff; 
+  caret-color: white;    
+
+}
+ ::placeholder{
+    color: rgb(58, 57, 57);
+    opacity: 1;
+}
+.Signup-Container{
+    width: 350px;
+     background: rgba(31, 9, 110, 0.05);
+    padding: 25px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.Signup h1{
+    
+    text-align: center;
+    margin-bottom: 15px;
+    color: white;
+    font-size: 32px;
+    font-weight: 700;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+letter-spacing: 2px;
+}
+.para p{
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 700;
+    color: rgb(182, 180, 180);
+}
+
+.input-credentials{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+label{
+    color: #cec9c9;
+    font-weight: 600;
+    margin-bottom: 15px;
+    
+}
+.input-credentials{
+    margin-bottom: 15px;
+}
+.Country{
+    margin-bottom: 15px;
+}
+option{
+    margin-top: 10px;
+}
+.signup-btn button {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(to bottom , #3b82f6, #1e40af);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+.signup-btn button:hover {
+    background: linear-gradient(to bottom, #60a5fa,#2563eb);
+    transform: translateY(-1px);
+}
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 15px 0;
+}
+.divider span {
+    margin: 0 10px;
+    color: #9ca3af;
+    font-size: 14px;
+    font-weight: 500;
+}
+.login-redirect{
+    text-align: center;
+
+}
+.login-redirect p{
+    color: #9ca3af;
+}
+.login-redirect p a{
+    color: #3b82f6;
+    text-decoration: none;
+    margin-left: 5px;
+    font-weight: 600;
+}
