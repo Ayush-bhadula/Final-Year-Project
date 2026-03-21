@@ -1,16 +1,35 @@
-document.addEventListener("DOMContentLoaded",()=>{
-    const selectdrop = document.querySelector('#countries');
-    fetch('https://restcountries.com/v3.1/all?fields=name').then(res=>{
-        return res.json();
-    }).then(data=>{
-        let output="";
-        data.forEach(country => {
-            output = output + `<option>${country.name.common}</option>`
-            
-        });
-        selectdrop.innerHTML = output;
-    }).catch(err=>{
+document.getElementById("login").addEventListener("click", async () => {
 
-        console.log(err);
-    })
-})
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("pass").value;
+
+  // ✅ Basic validation
+  if (!email || !password) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  const data = {
+    email: email,
+    password: password
+  };
+
+  try {
+    const res = await fetch("http://localhost:8080/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.text(); // or res.json()
+
+    console.log(result);
+    alert(result);
+
+  } catch (error) {
+    console.error(error);
+    alert("Login failed");
+  }
+});
