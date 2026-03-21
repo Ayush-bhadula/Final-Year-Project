@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded",()=>{
         
         let output = `<option value="" disabled selected>Select Country</option>`;
         data.forEach(country => {
-            output = output + `<option>${country.name.common}</option>`
+            output +=`<option>${country.name.common}</option>`
             
         });
         selectdrop.innerHTML = output;
@@ -15,3 +15,53 @@ document.addEventListener("DOMContentLoaded",()=>{
         console.log(err);
     })
 })
+
+
+
+document.getElementById("signupBtn").addEventListener("click", async () => {
+
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmpassword").value;
+  const country = document.getElementById("countries").value;
+
+  if (!name || !email || !username || !password || !confirmPassword) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  
+  const data = {
+    name,
+    email,
+    username,
+    password,
+    country
+  };
+
+  try {
+    const res = await fetch("http://localhost:8080/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.text(); 
+
+    console.log(result);
+    alert(result);
+
+  } catch (error) {
+    console.error(error);
+    alert("Something went wrong");
+  }
+});
