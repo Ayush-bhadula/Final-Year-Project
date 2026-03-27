@@ -18,6 +18,11 @@ public class User {
     @Column(nullable = false)
     private String password; // encrypted store hogi
 
+    private String username;
+    private String country;
+
+   
+
     // Getters + Setters
     public Long getId() { return id; }
     public String getEmail() { return email; }
@@ -26,4 +31,9 @@ public class User {
     public void setName(String name) { this.name = name; }
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+    public String getUsername(){return username;}
+    public void setUsername(String username){this.username = username;}
+    public String getCountry(){return country;}
+    public void setCountry(String country){this.country = country;}
+
 }
