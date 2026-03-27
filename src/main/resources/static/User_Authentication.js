@@ -15,7 +15,7 @@ document.getElementById("login").addEventListener("click", async () => {
   };
 
   try {
-    const res = await fetch("http://localhost:8080/login", {
+    const res = await fetch("https://final-year-project-production-a8ea.up.railway.app/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
