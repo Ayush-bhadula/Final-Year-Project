@@ -64,4 +64,6 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
     console.error(error);
     alert("Something went wrong");
   }
+
+window.location.href= "Dashboard.html";
 });
