@@ -127,6 +127,7 @@ margin-bottom: 20px;
   background: linear-gradient(135deg, rgba(46, 122, 245, 0.07) 0%, transparent 60%);
   opacity: 0;
   transition: opacity 0.35s;
+  pointer-events: none;
 }
 .card-style:hover {
   transform: translateY(-8px);

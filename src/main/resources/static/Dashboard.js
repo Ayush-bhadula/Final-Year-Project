@@ -1,20 +1,33 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function () {
 
-    const createBtn = document.getElementById("createMeetingBtn");
-    const joinBtn = document.getElementById("joinMeetingBtn");
 
-    const createModal = document.getElementById("createModal");
-    const joinModal = document.getElementById("joinModal");
+    const createBtn = document.querySelector("#createMeetingBtn");
+    const joinBtn = document.querySelector("#joinMeetingBtn");
 
-    createBtn.addEventListener("click", () => {
+    const createModal = document.querySelector("#createModal");
+    const joinModal = document.querySelector("#joinModal");
+
+    console.log("Buttons:", createBtn, joinBtn);
+
+    
+    if (!createBtn || !joinBtn) {
+        console.error("Buttons not found. Check IDs.");
+        return;
+    }
+
+    
+    createBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
         createModal.classList.add("show");
     });
 
-    joinBtn.addEventListener("click", () => {
+    joinBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
         joinModal.classList.add("show");
     });
 
-    window.addEventListener("click", (e) => {
+   
+    document.addEventListener("click", function (e) {
         if (e.target === createModal) {
             createModal.classList.remove("show");
         }
