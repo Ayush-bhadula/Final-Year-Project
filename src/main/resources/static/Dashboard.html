@@ -13,16 +13,17 @@
         <H2>MeetScribe</H2>
         <p>Welcome Back, User !</p>
     </div>
-    <div class="main-conatiner">
+    <div class="main-container">
         <div class="heading">
             <h1>Your Meeting Hub</h1>
+            <p>Start a new session or jump into an existing one</p> 
         </div>
-        <div class="sub-heading">
-            <h3>Start a new session or jump into an existing one </h3>
-        </div>
+    
+    
+        
 
         <div class="meeting-box">
-            <div class="create-meeting">
+            <div class="create-meeting card-style">
                 <div class="icon">
                     <svg viewBox="0 0 24 24">
                         <rect x="3" y="4" width="18" height="16" rx="3"></rect>
@@ -32,15 +33,54 @@
                         <line x1="16" y1="2" x2="16" y2="6"></line>
                     </svg>
                 </div>
+                <h3 class="meeting-heading">Create a Meeting</h3>
+                <p class="meeting-para">Start or join meetings with clear audio, video and real-time interaction0</p>
+                <div class="divider">
+            
+        </div>
+                <button id="createMeetingBtn" class="meeting-btn"> + New Meeting</button>
 
 
 
             </div>
-            <div class="join-meeting">
+            <div class="join-meeting card-style">
+                <div class="icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <h3 class="meeting-heading">Join a Meeting</h3>
+                <p class="meeting-para">Enter meeting room ad connect with participants instantly</p>
+                <div class="divider">
+            
+        </div>
+                <button id="joinMeetingBtn" class="meeting-btn"> → Join Meeting</button>
 
             </div>
         </div>
     </div>
+  
+<div id="createModal" class="modal">
+    <div class="modal-box">
+        <h3>Create Meeting</h3>
+        <input type="text" placeholder="Enter meeting name">
+        <button>Start Meeting</button>
+    </div>
+</div>
+
+
+<div id="joinModal" class="modal">
+    <div class="modal-box">
+        <h3>Join Meeting</h3>
+        <input type="text" placeholder="Enter meeting link/code">
+        <button>Join</button>
+    </div>
+</div>
+
+<script src="Dashboard.js"></script>
 
 </body>
 
