@@ -88,9 +88,5 @@ public class AuthController {
     public ResponseEntity<?> getAllUsers() {
         return ResponseEntity.ok(userRepository.findAll());
     }
-    @GetMapping("/health")
-    public ResponseEntity<String> health()
-    {
-        return  ResponseEntity.ok("ok report hai darling...");
-    }
+
 }
