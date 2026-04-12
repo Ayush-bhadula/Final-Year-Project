@@ -71,7 +71,6 @@ public class AuthController {
         session.invalidate();
         return ResponseEntity.ok("Logged out!");
     }
-
     // CHECK LOGIN
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getMe(HttpSession session) {
@@ -83,5 +82,10 @@ public class AuthController {
                 "userId", userId,
                 "userName", session.getAttribute("userName")
         ));
+    }
+    // GET ALL USERS
+    @GetMapping("/users")
+    public ResponseEntity<?> getAllUsers() {
+        return ResponseEntity.ok(userRepository.findAll());
     }
 }
