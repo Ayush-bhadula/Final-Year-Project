@@ -37,7 +37,7 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
   const data = { name, email, username, password, country };
 
   try {
-    const res = await fetch("https://lasttime-odxo.onrender.com/api/auth/signup", {
+    const res = await fetch("https://thirdlast.onrender.com/api/auth/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
