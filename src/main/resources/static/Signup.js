@@ -47,7 +47,7 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
   };
 
   try {
-      const res = await fetch("https://final-year-project-1-k975.onrender.com/api/auth/signup", {
+     const res = await fetch("https://final-year-project-1-k975.onrender.com/api/auth/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

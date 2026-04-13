@@ -12,8 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
-//@CrossOrigin(origins = {"http://127.0.0.1:5500", "https://singular-halva-a83985.netlify.app"}, allowCredentials = "true")
+@CrossOrigin(origins = {"http://127.0.0.1:5500", "https://singular-halva-a83985.netlify.app"}, allowCredentials = "true")
 public class AuthController {
 
     private final UserRepository userRepository;
