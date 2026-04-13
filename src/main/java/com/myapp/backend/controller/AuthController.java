@@ -83,6 +83,12 @@ public class AuthController {
                 "userName", session.getAttribute("userName")
         ));
     }
+    // DELETE ALL USERS
+    @DeleteMapping("/delete_users")
+    public ResponseEntity<String> deleteAllUsers() {
+        userRepository.deleteAll();
+        return ResponseEntity.ok("All users deleted!");
+    }
     // GET ALL USERS
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers() {
