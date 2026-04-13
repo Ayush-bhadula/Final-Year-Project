@@ -15,7 +15,7 @@ document.getElementById("login").addEventListener("click", async () => {
   };
 
   try {
-    const res = await fetch("https://final-year-project-production-a8ea.up.railway.app/api/auth/login", {
+    const res = await fetch("https://final-year-project-1-k975.onrender.com/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -32,4 +32,6 @@ document.getElementById("login").addEventListener("click", async () => {
     console.error(error);
     alert("Login failed");
   }
+
+  window.location.href = "Dashboard.html";
 });

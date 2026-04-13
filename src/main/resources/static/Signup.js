@@ -1,22 +1,89 @@
-document.addEventListener("DOMContentLoaded",()=>{
-    const selectdrop = document.querySelector('#countries');
-    fetch('https://restcountries.com/v3.1/all?fields=name').then(res=>{
-        return res.json();
-    }).then(data=>{
+// document.addEventListener("DOMContentLoaded",()=>{
+//     const selectdrop = document.querySelector('#countries');
+//     fetch('https://restcountries.com/v3.1/all?fields=name').then(res=>{
+//         return res.json();
+//     }).then(data=>{
         
-        let output = `<option value="" disabled selected>Select Country</option>`;
-        data.forEach(country => {
-            output +=`<option>${country.name.common}</option>`
+//         let output = `<option value="" disabled selected>Select Country</option>`;
+//         data.forEach(country => {
+//             output +=`<option>${country.name.common}</option>`
             
-        });
-        selectdrop.innerHTML = output;
-    }).catch(err=>{
+//         });
+//         selectdrop.innerHTML = output;
+//     }).catch(err=>{
 
-        console.log(err);
+//         console.log(err);
+//     })
+// })
+
+
+
+// document.getElementById("signupBtn").addEventListener("click", async () => {
+
+//   const name = document.getElementById("name").value;
+//   const email = document.getElementById("email").value;
+//   const username = document.getElementById("username").value;
+//   const password = document.getElementById("password").value;
+//   const confirmPassword = document.getElementById("confirmpassword").value;
+//   const country = document.getElementById("countries").value;
+
+//   if (!name || !email || !username || !password || !confirmPassword) {
+//     alert("Please fill all fields");
+//     return;
+//   }
+
+//   if (password !== confirmPassword) {
+//     alert("Passwords do not match");
+//     return;
+//   }
+
+  
+//   const data = {
+//     name,
+//     email,
+//     username,
+//     password,
+//     country
+//   };
+
+//   try {
+//     const res = await fetch("https://final-year-project-1-k975.onrender.com/api/auth/signup", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json"
+//       },
+//       body: JSON.stringify(data)
+//     });
+
+//     const result = await res.text(); 
+
+//     console.log(result);
+//     alert(result);
+
+//   } catch (error) {
+//     console.error(error);
+//     alert("Something went wrong");
+//   }
+
+// window.location.href= "Dashboard.html";
+// });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const selectdrop = document.querySelector('#countries');
+
+  fetch('https://restcountries.com/v3.1/all?fields=name')
+    .then(res => res.json())
+    .then(data => {
+      let output = `<option value="" disabled selected>Select Country</option>`;
+      data.forEach(country => {
+        output += `<option>${country.name.common}</option>`;
+      });
+      selectdrop.innerHTML = output;
     })
-})
-
-
+    .catch(err => {
+      console.log(err);
+    });
+});
 
 document.getElementById("signupBtn").addEventListener("click", async () => {
 
@@ -37,17 +104,10 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
     return;
   }
 
-  
-  const data = {
-    name,
-    email,
-    username,
-    password,
-    country
-  };
+  const data = { name, email, username, password, country };
 
   try {
-    const res = await fetch("https://final-year-project-production-a8ea.up.railway.app/api/auth/signup", {
+    const res = await fetch("https://final-year-project-1-k975.onrender.com/api/auth/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -55,15 +115,17 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
       body: JSON.stringify(data)
     });
 
-    const result = await res.text(); 
+    const result = await res.text();
 
-    console.log(result);
-    alert(result);
+    if (res.ok) {
+      alert("Signup successful!");
+      window.location.href = "Dashboard.html";
+    } else {
+      alert(result);
+    }
 
   } catch (error) {
     console.error(error);
-    alert("Something went wrong");
+    alert("Server error or CORS issue");
   }
-
-window.location.href= "Dashboard.html";
 });
