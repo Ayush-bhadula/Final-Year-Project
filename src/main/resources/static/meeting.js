@@ -79,7 +79,7 @@ function addVideo(stream, id) {
     video.srcObject = stream;
     video.autoplay = true;
     video.playsInline = true;
-    video.muted = id === "local"; // important for autoplay
+    video.muted = id === "local"; 
     video.id = id;
 
     videoContainer.appendChild(video);
