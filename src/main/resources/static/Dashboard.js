@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
     startMeetingBtn.addEventListener("click", function () {
         const code = createInput.value.trim();
         if (!code) return;
-        window.location.href = "MeetScribe.html";
+        window.location.href = `MeetScribe.html?room=${code}&user=${Date.now()}`;
     });
 
     joinNowBtn.addEventListener("click", function () {
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Please enter a meeting code");
             return;
         }
-        window.location.href = "MeetScribe.html";
+        window.location.href = `MeetScribe.html?room=${code}&user=${Date.now()}`;
     });
 
     document.addEventListener("click", function (e) {
