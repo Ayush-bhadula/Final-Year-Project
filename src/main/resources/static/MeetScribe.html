@@ -3,9 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>MeetScribe Room</title>
+    <link rel="stylesheet" href="meeting.css">
 </head>
+
 <body>
-    <h1>Dimaag ki Esi Taisi Hogi Idhar!</h1>
+
+<div class="navbar">
+    <h2>MeetScribe</h2>
+
+    <div class="nav-right">
+        <p id="roomCodeText"></p>
+        <button id="logoutBtn" class="logout-btn">Logout</button>
+    </div>
+</div>
+
+<div id="videoContainer"></div>
+
+<div class="controls">
+    <button id="micBtn" class="control-btn">
+        <svg id="micIcon" viewBox="0 0 24 24"></svg>
+    </button>
+
+    <button id="camBtn" class="control-btn">
+        <svg id="camIcon" viewBox="0 0 24 24"></svg>
+    </button>
+
+    <button id="leaveBtn" class="control-btn leave">
+        <svg viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+    </button>
+</div>
+
+<script src="meeting.js"></script>
+
 </body>
 </html>

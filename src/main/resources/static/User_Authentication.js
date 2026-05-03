@@ -3,19 +3,15 @@ document.getElementById("login").addEventListener("click", async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("pass").value;
 
-  // ✅ Basic validation
   if (!email || !password) {
     alert("Please fill all fields");
     return;
   }
 
-  const data = {
-    email: email,
-    password: password
-  };
+  const data = { email, password };
 
   try {
-    const res = await fetch("https://final-year-project-production-a8ea.up.railway.app/api/auth/login", {
+    const res = await fetch("https://final-year-project-3-pn8n.onrender.com/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -23,13 +19,21 @@ document.getElementById("login").addEventListener("click", async () => {
       body: JSON.stringify(data)
     });
 
-    const result = await res.text(); // or res.json()
+    const result = await res.text();
 
-    console.log(result);
-    alert(result);
+    console.log("Response:", result);
+
+    if (res.ok) {
+      
+      alert("Login successful");
+      window.location.href = "Dashboard.html";
+    } else {
+     
+      alert(result || "Invalid credentials");
+    }
 
   } catch (error) {
     console.error(error);
-    alert("Login failed");
+    alert("Server error or CORS issue");
   }
 });
