@@ -287,7 +287,12 @@ function connectToBackend() {
 
     socket.onopen = () => {
         console.log("✅ Connected to signaling server");
-        socket.send(JSON.stringify({ type: "join-room", roomId, userId }));
+        // ✅ FIX: roomCode field use kar raha hai ab roomId ki jagah
+        socket.send(JSON.stringify({
+            type: "join-room",
+            roomCode: roomId,
+            userId
+        }));
     };
 
     socket.onmessage = (event) => {
@@ -310,6 +315,17 @@ function connectToBackend() {
             showToast(id, "leave");
             removeVideoCard(id);
             if (peers[id]) { peers[id].close(); delete peers[id]; }
+        }
+
+        // Handle existing users when joining a room that already has people
+        if (type === "existing-users" || type === "existing_users" || type === "room-users" || type === "roomUsers") {
+            const users = data.users || data.userIds || data.existingUsers || [];
+            console.log("👥 Existing users in room:", users);
+            users.forEach(id => {
+                if (id === userId) return;
+                createVideoCard(id, id, null);
+                startCall(id);
+            });
         }
 
         if (type === "offer") handleOffer(data);
@@ -344,10 +360,12 @@ function createPeer(id) {
 
     peer.onicecandidate = (e) => {
         if (e.candidate) {
+            // ✅ FIX: roomCode added
             socket.send(JSON.stringify({
                 type: "ice-candidate",
                 to: id,
                 from: userId,
+                roomCode: roomId,
                 candidate: e.candidate
             }));
         }
@@ -385,7 +403,14 @@ async function startCall(id) {
     const offer = await peer.createOffer();
     await peer.setLocalDescription(offer);
 
-    socket.send(JSON.stringify({ type: "offer", to: id, from: userId, offer }));
+    // ✅ FIX: roomCode added
+    socket.send(JSON.stringify({
+        type: "offer",
+        to: id,
+        from: userId,
+        roomCode: roomId,
+        offer
+    }));
     console.log("📤 Offer sent to:", id);
 }
 
@@ -402,7 +427,14 @@ async function handleOffer(data) {
     const answer = await peer.createAnswer();
     await peer.setLocalDescription(answer);
 
-    socket.send(JSON.stringify({ type: "answer", to: from, from: userId, answer }));
+    // ✅ FIX: roomCode added
+    socket.send(JSON.stringify({
+        type: "answer",
+        to: from,
+        from: userId,
+        roomCode: roomId,
+        answer
+    }));
     console.log("📤 Answer sent to:", from);
 }
 
