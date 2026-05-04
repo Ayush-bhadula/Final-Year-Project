@@ -27,6 +27,12 @@ public class SignalingHandler extends TextWebSocketHandler {
 
         String type = json.get("type").asText();
 
+        // Ping handle karo — connection zinda rakhne ke liye
+        if (type.equals("ping")) {
+            session.sendMessage(new TextMessage("{\"type\":\"pong\"}"));
+            return;
+        }
+
         // roomId ya room dono support karo
         String roomCode = null;
         if (json.has("roomId")) roomCode = json.get("roomId").asText();

@@ -288,6 +288,13 @@ function connectToBackend() {
     socket.onopen = () => {
         console.log("✅ Connected to signaling server");
         socket.send(JSON.stringify({ type: "join-room", roomId, userId }));
+
+        // Heartbeat
+        setInterval(() => {
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ type: "ping", roomId }));
+            }
+        }, 20000);
     };
 
     socket.onmessage = (event) => {
@@ -348,6 +355,7 @@ function createPeer(id) {
                 type: "ice-candidate",
                 to: id,
                 from: userId,
+                roomId: roomId,
                 candidate: e.candidate
             }));
         }
@@ -385,7 +393,7 @@ async function startCall(id) {
     const offer = await peer.createOffer();
     await peer.setLocalDescription(offer);
 
-    socket.send(JSON.stringify({ type: "offer", to: id, from: userId, offer }));
+    socket.send(JSON.stringify({ type: "offer", to: id, from: userId, roomId: roomId, offer }));
     console.log("📤 Offer sent to:", id);
 }
 
@@ -402,7 +410,7 @@ async function handleOffer(data) {
     const answer = await peer.createAnswer();
     await peer.setLocalDescription(answer);
 
-    socket.send(JSON.stringify({ type: "answer", to: from, from: userId, answer }));
+    socket.send(JSON.stringify({ type: "answer", to: from, from: userId, roomId: roomId, answer }));
     console.log("📤 Answer sent to:", from);
 }
 
