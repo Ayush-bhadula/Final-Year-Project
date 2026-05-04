@@ -33,7 +33,7 @@ public class SignalingHandler extends TextWebSocketHandler {
         else if (json.has("room")) roomCode = json.get("room").asText();
 
         if (roomCode == null || roomCode.isEmpty()) {
-            System.out.println("No roomCode found in message: " + payload);
+            System.out.println("No roomCode found: " + payload);
             return;
         }
 
@@ -60,12 +60,24 @@ public class SignalingHandler extends TextWebSocketHandler {
             }
 
         } else {
-            // offer, answer, ice-candidate — sirf target user ko bhejo
+            // offer, answer, ice-candidate — targeted routing
             List<WebSocketSession> roomUsers = rooms.get(roomCode);
             if (roomUsers != null) {
+                String toUserId = json.has("to") ? json.get("to").asText() : null;
+
                 for (WebSocketSession user : roomUsers) {
                     if (!user.getId().equals(session.getId()) && user.isOpen()) {
-                        user.sendMessage(new TextMessage(payload));
+                        if (toUserId != null) {
+                            // Sirf us specific user ko bhejo
+                            String uid = (String) user.getAttributes().get("userId");
+                            if (toUserId.equals(uid)) {
+                                user.sendMessage(new TextMessage(payload));
+                                break;
+                            }
+                        } else {
+                            // to field nahi hai to broadcast
+                            user.sendMessage(new TextMessage(payload));
+                        }
                     }
                 }
             }
