@@ -287,12 +287,7 @@ function connectToBackend() {
 
     socket.onopen = () => {
         console.log("✅ Connected to signaling server");
-        // ✅ FIX: roomCode field use kar raha hai ab roomId ki jagah
-        socket.send(JSON.stringify({
-            type: "join-room",
-            roomCode: roomId,
-            userId
-        }));
+        socket.send(JSON.stringify({ type: "join-room", roomId, userId }));
     };
 
     socket.onmessage = (event) => {
@@ -365,7 +360,6 @@ function createPeer(id) {
                 type: "ice-candidate",
                 to: id,
                 from: userId,
-                roomCode: roomId,
                 candidate: e.candidate
             }));
         }
@@ -403,14 +397,7 @@ async function startCall(id) {
     const offer = await peer.createOffer();
     await peer.setLocalDescription(offer);
 
-    // ✅ FIX: roomCode added
-    socket.send(JSON.stringify({
-        type: "offer",
-        to: id,
-        from: userId,
-        roomCode: roomId,
-        offer
-    }));
+    socket.send(JSON.stringify({ type: "offer", to: id, from: userId, offer }));
     console.log("📤 Offer sent to:", id);
 }
 
@@ -427,14 +414,7 @@ async function handleOffer(data) {
     const answer = await peer.createAnswer();
     await peer.setLocalDescription(answer);
 
-    // ✅ FIX: roomCode added
-    socket.send(JSON.stringify({
-        type: "answer",
-        to: from,
-        from: userId,
-        roomCode: roomId,
-        answer
-    }));
+    socket.send(JSON.stringify({ type: "answer", to: from, from: userId, answer }));
     console.log("📤 Answer sent to:", from);
 }
 
