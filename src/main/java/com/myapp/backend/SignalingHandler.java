@@ -26,13 +26,41 @@ public class SignalingHandler extends TextWebSocketHandler {
         JsonNode json = objectMapper.readTree(payload);
 
         String type = json.get("type").asText();
-        String roomCode = json.get("room").asText();
 
-        if (type.equals("join")) {
+        // roomId ya room dono support karo
+        String roomCode = null;
+        if (json.has("roomId")) roomCode = json.get("roomId").asText();
+        else if (json.has("room")) roomCode = json.get("room").asText();
+
+        if (roomCode == null || roomCode.isEmpty()) {
+            System.out.println("No roomCode found in message: " + payload);
+            return;
+        }
+
+        if (type.equals("join") || type.equals("join-room")) {
             rooms.computeIfAbsent(roomCode, k -> new ArrayList<>()).add(session);
             session.getAttributes().put("room", roomCode);
-            System.out.println("Joined room: " + roomCode);
+
+            String joinedUserId = json.has("userId") ? json.get("userId").asText() : session.getId();
+            session.getAttributes().put("userId", joinedUserId);
+
+            System.out.println("User " + joinedUserId + " joined room: " + roomCode);
+
+            // Baaki users ko notify karo
+            List<WebSocketSession> roomUsers = rooms.get(roomCode);
+            for (WebSocketSession user : roomUsers) {
+                if (!user.getId().equals(session.getId()) && user.isOpen()) {
+                    user.sendMessage(new TextMessage(
+                            objectMapper.writeValueAsString(Map.of(
+                                    "type", "user-joined",
+                                    "userId", joinedUserId
+                            ))
+                    ));
+                }
+            }
+
         } else {
+            // offer, answer, ice-candidate — sirf target user ko bhejo
             List<WebSocketSession> roomUsers = rooms.get(roomCode);
             if (roomUsers != null) {
                 for (WebSocketSession user : roomUsers) {
@@ -47,9 +75,31 @@ public class SignalingHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         String roomCode = (String) session.getAttributes().get("room");
+        String userId = (String) session.getAttributes().get("userId");
+
         if (roomCode != null && rooms.containsKey(roomCode)) {
             rooms.get(roomCode).remove(session);
+
+            // Baaki users ko disconnect notify karo
+            List<WebSocketSession> roomUsers = rooms.get(roomCode);
+            if (roomUsers != null && userId != null) {
+                for (WebSocketSession user : roomUsers) {
+                    if (user.isOpen()) {
+                        try {
+                            user.sendMessage(new TextMessage(
+                                    objectMapper.writeValueAsString(Map.of(
+                                            "type", "user-left",
+                                            "userId", userId
+                                    ))
+                            ));
+                        } catch (Exception e) {
+                            System.out.println("Error notifying user-left: " + e.getMessage());
+                        }
+                    }
+                }
+            }
         }
-        System.out.println("Disconnected: " + session.getId());
+
+        System.out.println("Disconnected: " + session.getId() + " userId: " + userId);
     }
 }
