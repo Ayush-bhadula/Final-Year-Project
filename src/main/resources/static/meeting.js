@@ -16,6 +16,7 @@ let peers = {};
 let socket;
 let micOn = true;
 let camOn = true;
+let heartbeatInterval = null; // ✅ FIX 1: track heartbeat
 
 const MIC_ON_SVG = `<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>`;
 const MIC_OFF_SVG = `<line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>`;
@@ -276,6 +277,7 @@ camBtn.addEventListener("click", () => {
 
 leaveBtn.addEventListener("click", () => {
     if (localStream) localStream.getTracks().forEach(t => t.stop());
+    if (heartbeatInterval) clearInterval(heartbeatInterval); // ✅ FIX 1
     if (socket) socket.close();
     window.location.href = "Dashboard.html";
 });
@@ -288,6 +290,13 @@ function connectToBackend() {
     socket.onopen = () => {
         console.log("✅ Connected to signaling server");
         socket.send(JSON.stringify({ type: "join-room", roomId, userId }));
+
+        // ✅ FIX 1: save heartbeat reference so we can clear it
+        heartbeatInterval = setInterval(() => {
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ type: "ping", roomId }));
+            }
+        }, 20000);
     };
 
     socket.onmessage = (event) => {
@@ -300,7 +309,8 @@ function connectToBackend() {
             if (id === userId) return;
             console.log("👤 User joined:", id);
             createVideoCard(id, id, null);
-            startCall(id);
+            // ✅ FIX 2: delay before starting call so peer session registers
+            setTimeout(() => startCall(id), 500);
             showToast(id, "join");
         }
 
@@ -312,23 +322,18 @@ function connectToBackend() {
             if (peers[id]) { peers[id].close(); delete peers[id]; }
         }
 
-        // Handle existing users when joining a room that already has people
-        if (type === "existing-users" || type === "existing_users" || type === "room-users" || type === "roomUsers") {
-            const users = data.users || data.userIds || data.existingUsers || [];
-            console.log("👥 Existing users in room:", users);
-            users.forEach(id => {
-                if (id === userId) return;
-                createVideoCard(id, id, null);
-                startCall(id);
-            });
-        }
-
         if (type === "offer") handleOffer(data);
         if (type === "answer") handleAnswer(data);
         if (type === "ice-candidate" || type === "ice_candidate") handleIce(data);
     };
 
-    socket.onclose = () => console.log("❌ Disconnected from signaling server");
+    // ✅ FIX 3: clear heartbeat + auto reconnect on disconnect
+    socket.onclose = () => {
+        console.log("❌ Disconnected from signaling server");
+        if (heartbeatInterval) clearInterval(heartbeatInterval);
+        setTimeout(connectToBackend, 2000); // auto reconnect after 2s
+    };
+
     socket.onerror = (e) => console.error("🔴 WebSocket error:", e);
 }
 
@@ -355,13 +360,18 @@ function createPeer(id) {
 
     peer.onicecandidate = (e) => {
         if (e.candidate) {
-            // ✅ FIX: roomCode added
-            socket.send(JSON.stringify({
-                type: "ice-candidate",
-                to: id,
-                from: userId,
-                candidate: e.candidate
-            }));
+            // ✅ FIX 4: only send if socket is open
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: "ice-candidate",
+                    to: id,
+                    from: userId,
+                    roomId: roomId,
+                    candidate: e.candidate
+                }));
+            } else {
+                console.warn("⚠️ Socket closed, cannot send ICE candidate");
+            }
         }
     };
 
@@ -397,7 +407,7 @@ async function startCall(id) {
     const offer = await peer.createOffer();
     await peer.setLocalDescription(offer);
 
-    socket.send(JSON.stringify({ type: "offer", to: id, from: userId, offer }));
+    socket.send(JSON.stringify({ type: "offer", to: id, from: userId, roomId: roomId, offer }));
     console.log("📤 Offer sent to:", id);
 }
 
@@ -414,7 +424,7 @@ async function handleOffer(data) {
     const answer = await peer.createAnswer();
     await peer.setLocalDescription(answer);
 
-    socket.send(JSON.stringify({ type: "answer", to: from, from: userId, answer }));
+    socket.send(JSON.stringify({ type: "answer", to: from, from: userId, roomId: roomId, answer }));
     console.log("📤 Answer sent to:", from);
 }
 
