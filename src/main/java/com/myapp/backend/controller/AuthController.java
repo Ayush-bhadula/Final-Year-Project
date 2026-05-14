@@ -1,4 +1,4 @@
-package com.myapp.backend.Controller;
+package com.myapp.backend.controller;
 
 import com.myapp.backend.model.User;
 import com.myapp.backend.repository.UserRepository;
