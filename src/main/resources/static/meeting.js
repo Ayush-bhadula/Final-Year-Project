@@ -20,8 +20,12 @@ let heartbeatInterval = null;
 
 // ================== TRANSCRIPTION STATE ==================
 let transcript = [];
-let recognition = null;
 let transcriptionActive = false;
+let mediaRecorder = null;
+let audioChunks = [];
+
+// ✅ APNI NAYI GROQ API KEY YAHAN PASTE KARO
+const GROQ_API_KEY = "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";
 
 const MIC_ON_SVG = `<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>`;
 const MIC_OFF_SVG = `<line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>`;
@@ -329,8 +333,6 @@ function createPeer(id) {
                     roomId: roomId,
                     candidate: e.candidate
                 }));
-            } else {
-                console.warn("⚠️ Socket closed, cannot send ICE candidate");
             }
         }
     };
@@ -402,77 +404,110 @@ async function handleIce(data) {
 }
 
 
-// ================== TRANSCRIPTION ==================
+// ================== GROQ WHISPER TRANSCRIPTION ==================
+async function sendToGroq(audioBlob) {
+    try {
+        const formData = new FormData();
+        formData.append("file", audioBlob, "audio.webm");
+        formData.append("model", "whisper-large-v3");
+        formData.append("language", "en"); // "hi" for Hindi
+
+        const response = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${GROQ_API_KEY}`
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            console.error("Groq error:", await response.text());
+            return;
+        }
+
+        const result = await response.json();
+        const text = result.text?.trim();
+        if (!text) return;
+
+        const time = new Date().toLocaleTimeString();
+        transcript.push({ time, speaker: userId, text });
+        addTranscriptLine(time, "You", text);
+
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: "transcript",
+                from: userId,
+                roomId: roomId,
+                text, time
+            }));
+        }
+
+        console.log("📝 Transcribed:", text);
+    } catch (err) {
+        console.error("Groq fetch error:", err);
+    }
+}
+
 function startTranscription() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        alert("Speech Recognition not supported! Please use Chrome.");
+    if (!localStream) {
+        alert("No microphone found!");
         return;
     }
 
-    recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = false;
-    recognition.lang = "en-US";
+    // Audio only stream from localStream
+    const audioStream = new MediaStream(localStream.getAudioTracks());
 
-    recognition.onresult = (event) => {
-        const result = event.results[event.results.length - 1];
-        if (result.isFinal) {
-            const text = result[0].transcript.trim();
-            const time = new Date().toLocaleTimeString();
-            transcript.push({ time, speaker: userId, text });
-            addTranscriptLine(time, "You", text);
-            if (socket && socket.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify({
-                    type: "transcript",
-                    from: userId,
-                    roomId: roomId,
-                    text, time
-                }));
-            }
-        }
+    mediaRecorder = new MediaRecorder(audioStream, { mimeType: "audio/webm" });
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunks.push(e.data);
     };
 
-    recognition.onerror = (e) => {
-        console.warn("Speech error:", e.error);
-        if (e.error === "network") {
-            setTimeout(() => {
-                if (transcriptionActive) {
-                    try { recognition.start(); } catch(err) {}
-                }
-            }, 3000);
-        } else if (e.error !== "no-speech" && transcriptionActive) {
-            setTimeout(() => {
-                if (transcriptionActive) {
-                    try { recognition.start(); } catch(err) {}
-                }
-            }, 1000);
-        }
-    };
+    // Every 5 seconds — send chunk to Groq
+    mediaRecorder.onstop = async () => {
+        if (audioChunks.length === 0) return;
+        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+        audioChunks = [];
+        await sendToGroq(audioBlob);
 
-    recognition.onend = () => {
+        // Restart recording if still active
         if (transcriptionActive) {
-            try { recognition.start(); } catch(e) {}
+            mediaRecorder.start();
+            setTimeout(() => {
+                if (transcriptionActive && mediaRecorder.state === "recording") {
+                    mediaRecorder.stop();
+                }
+            }, 5000);
         }
     };
 
-    recognition.start();
+    mediaRecorder.start();
     transcriptionActive = true;
+
+    // Stop every 5 seconds to send chunk
+    setTimeout(() => {
+        if (transcriptionActive && mediaRecorder.state === "recording") {
+            mediaRecorder.stop();
+        }
+    }, 5000);
 
     const btn = document.getElementById("transcriptBtn");
     if (btn) {
         btn.style.background = "rgba(16,185,90,0.8)";
         btn.title = "Stop Transcription";
     }
-    console.log("🎙️ Transcription started");
+    console.log("🎙️ Groq transcription started");
 }
 
 function stopTranscription() {
-    if (recognition) {
-        transcriptionActive = false;
-        recognition.stop();
-        recognition = null;
+    transcriptionActive = false;
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
     }
+    mediaRecorder = null;
+    audioChunks = [];
+
     const btn = document.getElementById("transcriptBtn");
     if (btn) { btn.style.background = ""; btn.title = "Start Transcription"; }
     console.log("🛑 Transcription stopped");
@@ -513,9 +548,8 @@ function downloadTranscript() {
 // ================== INJECT TRANSCRIPT UI ==================
 (function injectTranscriptUI() {
     const controls = document.querySelector(".controls");
-    const leaveButton = document.getElementById("leaveBtn"); // ✅ FIX: leaveBtn se pehle add karo
+    const leaveButton = document.getElementById("leaveBtn");
 
-    // CC Transcript button
     const transcriptBtn = document.createElement("button");
     transcriptBtn.id = "transcriptBtn";
     transcriptBtn.title = "Start Transcription";
@@ -527,7 +561,6 @@ function downloadTranscript() {
     </svg>`;
     transcriptBtn.onclick = toggleTranscription;
 
-    // Download button
     const downloadBtn = document.createElement("button");
     downloadBtn.id = "downloadTranscriptBtn";
     downloadBtn.title = "Download Transcript (.txt)";
@@ -540,7 +573,6 @@ function downloadTranscript() {
     </svg>`;
     downloadBtn.onclick = downloadTranscript;
 
-    // ✅ FIX: leaveBtn se pehle insert karo
     if (controls && leaveButton) {
         controls.insertBefore(transcriptBtn, leaveButton);
         controls.insertBefore(downloadBtn, leaveButton);
@@ -549,7 +581,6 @@ function downloadTranscript() {
         controls.appendChild(downloadBtn);
     }
 
-    // Transcript panel
     const panel = document.createElement("div");
     panel.id = "transcriptPanel";
     panel.style.cssText = `
