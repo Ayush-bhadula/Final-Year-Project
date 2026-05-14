@@ -1,6 +1,7 @@
 const params = new URLSearchParams(window.location.search);
 const roomId = params.get("room");
 const userId = params.get("user");
+const displayName = localStorage.getItem("username") || userId;
 
 if (!roomId || !userId) {
     alert("Invalid meeting link");
@@ -24,7 +25,6 @@ let transcriptionActive = false;
 let mediaRecorder = null;
 let audioChunks = [];
 
-// ✅ APNI NAYI GROQ API KEY YAHAN PASTE KARO
 const GROQ_API_KEY = "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";
 
 const MIC_ON_SVG = `<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>`;
@@ -101,7 +101,7 @@ async function startMedia() {
         console.warn("⚠️ No camera/mic:", err.message);
         localStream = null; micOn = false; camOn = false;
     }
-    createVideoCard("local", userId, localStream);
+    createVideoCard("local", displayName, localStream);
     updateControlIcons();
     connectToBackend();
 }
@@ -133,7 +133,7 @@ function createVideoCard(peerId, displayName, stream) {
 
     const nameTag = document.createElement("div");
     nameTag.className = "name-tag";
-    nameTag.innerText = peerId === "local" ? "You" : displayName;
+    nameTag.innerText = peerId === "local" ? displayName : displayName;
 
     const statusBar = document.createElement("div");
     statusBar.className = "status-bar";
@@ -410,7 +410,7 @@ async function sendToGroq(audioBlob) {
         const formData = new FormData();
         formData.append("file", audioBlob, "audio.webm");
         formData.append("model", "whisper-large-v3");
-        formData.append("language", "en"); // "hi" for Hindi
+        formData.append("language", "en");
 
         const response = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
             method: "POST",
@@ -430,13 +430,13 @@ async function sendToGroq(audioBlob) {
         if (!text) return;
 
         const time = new Date().toLocaleTimeString();
-        transcript.push({ time, speaker: userId, text });
-        addTranscriptLine(time, "You", text);
+        transcript.push({ time, speaker: displayName, text });
+        addTranscriptLine(time, displayName, text);
 
         if (socket && socket.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify({
                 type: "transcript",
-                from: userId,
+                from: displayName,
                 roomId: roomId,
                 text, time
             }));
@@ -454,9 +454,7 @@ function startTranscription() {
         return;
     }
 
-    // Audio only stream from localStream
     const audioStream = new MediaStream(localStream.getAudioTracks());
-
     mediaRecorder = new MediaRecorder(audioStream, { mimeType: "audio/webm" });
     audioChunks = [];
 
@@ -464,14 +462,12 @@ function startTranscription() {
         if (e.data.size > 0) audioChunks.push(e.data);
     };
 
-    // Every 5 seconds — send chunk to Groq
     mediaRecorder.onstop = async () => {
         if (audioChunks.length === 0) return;
         const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
         audioChunks = [];
         await sendToGroq(audioBlob);
 
-        // Restart recording if still active
         if (transcriptionActive) {
             mediaRecorder.start();
             setTimeout(() => {
@@ -485,7 +481,6 @@ function startTranscription() {
     mediaRecorder.start();
     transcriptionActive = true;
 
-    // Stop every 5 seconds to send chunk
     setTimeout(() => {
         if (transcriptionActive && mediaRecorder.state === "recording") {
             mediaRecorder.stop();
