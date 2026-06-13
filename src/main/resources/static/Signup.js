@@ -47,7 +47,7 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
   };
 
   try {
-    const res = await fetch("https://final-year-project-production-a8ea.up.railway.app/api/auth/signup", {
+    const res = await fetch("https://final-year-project-3-pn8n.onrender.com/api/auth/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
